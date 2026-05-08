@@ -1,5 +1,0 @@
-D:\aubo\aubosdk\build-serviceinterface-Desktop_Qt_5_12_9_MinGW_32_bit-Debug\serviceinterface-2.4.2-win32.bf52073\example\csharp\auboi5-sdk-for-windows-x86-csharp\bin\x64\Debug\auboi5-sdk-for-windows-x86-csharp.exe
-D:\aubo\aubosdk\build-serviceinterface-Desktop_Qt_5_12_9_MinGW_32_bit-Debug\serviceinterface-2.4.2-win32.bf52073\example\csharp\auboi5-sdk-for-windows-x86-csharp\bin\x64\Debug\auboi5-sdk-for-windows-x86-csharp.pdb
-D:\aubo\aubosdk\build-serviceinterface-Desktop_Qt_5_12_9_MinGW_32_bit-Debug\serviceinterface-2.4.2-win32.bf52073\example\csharp\auboi5-sdk-for-windows-x86-csharp\obj\x64\Debug\auboi5-sdk-for-windows-x86-csharp.csprojResolveAssemblyReference.cache
-D:\aubo\aubosdk\build-serviceinterface-Desktop_Qt_5_12_9_MinGW_32_bit-Debug\serviceinterface-2.4.2-win32.bf52073\example\csharp\auboi5-sdk-for-windows-x86-csharp\obj\x64\Debug\auboi5-sdk-for-windows-x86-csharp.exe
-D:\aubo\aubosdk\build-serviceinterface-Desktop_Qt_5_12_9_MinGW_32_bit-Debug\serviceinterface-2.4.2-win32.bf52073\example\csharp\auboi5-sdk-for-windows-x86-csharp\obj\x64\Debug\auboi5-sdk-for-windows-x86-csharp.pdb

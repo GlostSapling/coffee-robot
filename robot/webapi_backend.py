@@ -5,7 +5,7 @@ import os
 from typing import List
 
 # Add the SDK path so we can import it
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "aubo", "python_aubo_openclaw_SDK"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk"))
 
 from aubo_openclaw_sdk import AuboOpenclawSDK, SDKError
 from robot.base import RobotController, Pose

@@ -1,6 +1,0 @@
-string cls
-string func
-string params
----
-string result
-string error

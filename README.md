@@ -196,7 +196,3 @@ task.run_by_command("pick_cup")      # 单步
 
 - `webapi` — 通过 Windows 上位机的 HTTP API 控制（适合 Windows 环境）
 - `local` — 通过 libpyauboi5 本地 SDK 直连（适合 Ubuntu 环境）
-=======
-# coffee-robot
-基于 AUBO-i10 协作机械臂和openclaw的自动咖啡机项目
->>>>>>> 2fe542db31d32a94d4e386976adc1608c7c0ccc8
