@@ -1,0 +1,113 @@
+# Coffee Robot Task Configuration
+# All positions are joint angles in radians (6 axes)
+# Modify these values to match your actual workspace layout
+
+robot:
+  # Backend: "webapi" (Windows) or "local" (Ubuntu with libpyauboi5)
+  backend: webapi
+
+  # WebAPI backend settings
+  webapi:
+    host: "127.0.0.1"
+    webapi_port: 8000
+    ros2api_port: 8001
+    robot_ip: "192.168.10.3"
+    robot_port: 8899
+
+  # Local SDK backend settings (Ubuntu)
+  local:
+    sdk_path: "~/aubo_quick_start/python_linux_lib"
+    robot_ip: "192.168.10.3"
+    robot_port: 8899
+
+  # Motion parameters
+  speed:
+    max_velocity: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]     # rad/s per joint
+    max_acceleration: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]  # rad/s^2 per joint
+    blend_radius: 0.01                                   # m, for smooth transitions
+
+  # Tool center point offset (m) from flange to gripper tip
+  tcp_offset:
+    x: 0.0
+    y: 0.0
+    z: 0.15
+
+gripper:
+  # Gripper type: "serial" (placeholder), "none" (dry run)
+  type: serial
+
+  serial:
+    port: "/dev/ttyUSB0"
+    baudrate: 115200
+    # Protocol bytes (customize for your gripper)
+    open_cmd: [0x01, 0x01, 0x00]
+    close_cmd: [0x01, 0x01, 0xFF]
+    # Positions (gripper-specific units)
+    open_position: 100
+    close_position: 0
+    # Timing
+    settle_time: 0.5  # seconds to wait after grip/release
+
+coffee_machine:
+  type: nespresso
+  brew_time: 25  # seconds to wait for brewing
+
+# Waypoints: [J1, J2, J3, J4, J5, J6] in radians
+# IMPORTANT: These are PLACEHOLDER values - measure your actual positions!
+waypoints:
+  home:
+    joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+  # Cup pickup station
+  cup_pickup:
+    joints: [0.3, -0.5, 0.8, 0.0, 0.5, 0.0]
+    approach_offset: [0.0, 0.0, 0.1]   # z-up before descending
+    depart_offset: [0.0, 0.0, 0.1]     # z-up after gripping
+
+  # Position cup under Nespresso spout
+  cup_under_machine:
+    joints: [-0.2, -0.3, 0.6, 0.0, 0.4, 0.0]
+    approach_offset: [0.0, 0.0, 0.1]
+    depart_offset: [0.0, 0.0, 0.08]
+
+  # Capsule storage pickup
+  capsule_pickup:
+    joints: [0.5, -0.4, 0.7, 0.0, 0.6, 0.0]
+    approach_offset: [0.0, 0.0, 0.08]
+    depart_offset: [0.0, 0.0, 0.08]
+
+  # Nespresso lid handle (open position)
+  machine_lid_open:
+    joints: [-0.15, -0.25, 0.55, 0.0, 0.3, 0.0]
+    approach_offset: [0.0, 0.0, 0.05]
+    depart_offset: [0.0, 0.0, 0.05]
+
+  # Insert capsule into holder
+  capsule_insert:
+    joints: [-0.18, -0.28, 0.58, 0.0, 0.35, 0.0]
+    approach_offset: [0.0, 0.0, 0.05]
+    depart_offset: [0.0, 0.0, 0.08]
+
+  # Close lid position
+  machine_lid_close:
+    joints: [-0.15, -0.25, 0.55, 0.0, 0.3, 0.0]
+    approach_offset: [0.0, 0.0, 0.05]
+    depart_offset: [0.0, 0.0, 0.05]
+
+  # Start button position
+  machine_button:
+    joints: [-0.25, -0.2, 0.5, 0.0, 0.25, 0.0]
+    approach_offset: [0.0, 0.0, 0.03]
+    depart_offset: [0.0, 0.0, 0.05]
+
+  # Pick cup from under machine (after brewing)
+  cup_from_machine:
+    joints: [-0.2, -0.3, 0.6, 0.0, 0.4, 0.0]
+    approach_offset: [0.0, 0.0, 0.1]
+    depart_offset: [0.0, 0.0, 0.1]
+
+  # Final delivery position
+  cup_delivery:
+    joints: [0.4, -0.4, 0.7, 0.0, 0.5, 0.0]
+    approach_offset: [0.0, 0.0, 0.1]
+    depart_offset: [0.0, 0.0, 0.1]
