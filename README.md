@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 咖啡机器人 - Aubo-i10 Nespresso 自动咖啡制作系统
 
 基于遨博 Aubo-i10 机械臂的自动咖啡制作 Demo。机械臂完成从拿杯子、放胶囊、到出杯的全流程自动化操作，支持后续接入 OpenClaw 语音控制。
@@ -195,3 +196,7 @@ task.run_by_command("pick_cup")      # 单步
 
 - `webapi` — 通过 Windows 上位机的 HTTP API 控制（适合 Windows 环境）
 - `local` — 通过 libpyauboi5 本地 SDK 直连（适合 Ubuntu 环境）
+=======
+# coffee-robot
+基于 AUBO-i10 协作机械臂和openclaw的自动咖啡机项目
+>>>>>>> 2fe542db31d32a94d4e386976adc1608c7c0ccc8

@@ -1,0 +1,29 @@
+{
+  "models": {
+    "providers": {
+      "xiaomi": {
+        "baseUrl": "https://api.xiaomimimo.com/v1",
+        "api": "openai-responses",
+        "models": [
+          {
+            "id": "mimo-v2-pro",
+            "name": "Xiaomi MiMo V2 Pro",
+            "contextWindow": 128000
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "xiaomi/mimo-v2-pro"
+      },
+      "workspace": "/home/sapling/coffee-robot"
+    }
+  },
+  "gateway": {
+    "bind": "loopback",
+    "port": 18789
+  }
+}
