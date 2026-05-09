@@ -10,6 +10,10 @@ Aubo (遨博) robot Windows host application ("上位机") for controlling an Au
 - A separate ROS2API (default port 8001) for ROS2 bridge integration
 - A ROS2 HTTP bridge node that runs on Ubuntu to relay `/joint_states` and `/aubo/joint_cmds`
 
+## Important: SDK is Windows-Only
+
+The Aubo SDK (`serviceinterface2.dll`) only supports Windows. **WebAPI is the primary control interface for all non-Windows platforms** (Linux, ROS2, remote clients). When developing Linux-side features, always use the WebAPI HTTP endpoints — do not attempt to call the SDK directly.
+
 ## Architecture
 
 The core application lives in `aubo/aubo_host_workspace/`:
