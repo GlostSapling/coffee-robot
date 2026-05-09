@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Coffee Robot Demo - Aubo-i10 Nespresso Coffee Making
+咖啡机器人 Demo - Aubo-i10 Nespresso 自动咖啡制作
 
-Usage:
-    # Full workflow (dry run - no robot needed)
+用法:
+    # 仿真模式（不需要连接机器人）
     python coffee_demo.py --dry-run
 
-    # Full workflow with robot
+    # 完整流程（连接机器人）
     python coffee_demo.py
 
-    # Single step
+    # 执行单个步骤
     python coffee_demo.py --step pick_cup
 
-    # Custom config
+    # 指定配置文件
     python coffee_demo.py --config my_config.yaml
 
-    # Interactive command mode (for VLA/voice integration)
+    # 交互模式（语音/VLA 测试入口）
     python coffee_demo.py --interactive
 """
 
@@ -37,7 +37,7 @@ def load_config(path: str) -> dict:
 
 def print_results(results: List[StepResult]):
     print("\n" + "=" * 50)
-    print("  Coffee Task Results")
+    print("  咖啡任务执行结果")
     print("=" * 50)
     for r in results:
         status = "OK" if r.success else "FAIL"
@@ -46,9 +46,9 @@ def print_results(results: List[StepResult]):
 
 
 def print_dry_run(config: dict):
-    """Print planned moves without executing."""
+    """打印计划动作（不执行）。"""
     print("\n" + "=" * 50)
-    print("  DRY RUN - Planned Coffee Workflow")
+    print("  仿真模式 - 咖啡工作流计划")
     print("=" * 50)
     wps = config["waypoints"]
     steps = [
@@ -65,28 +65,34 @@ def print_dry_run(config: dict):
     ]
     for step_desc, wp_name in steps:
         if wp_name in wps:
-            joints = wps[wp_name]["joints"]
-            print(f"  {step_desc} -> {wp_name}: {joints}")
+            wp = wps[wp_name]
+            if "arc_points" in wp:
+                count = len(wp["arc_points"])
+                print(f"  {step_desc} -> {wp_name}: 弧线运动（{count} 个路径点）")
+            elif "joints" in wp:
+                print(f"  {step_desc} -> {wp_name}: {wp['joints']}")
+            else:
+                print(f"  {step_desc} -> {wp_name}")
         else:
             print(f"  {step_desc} -> {wp_name}")
-    print("\n  Gripper: open/close at each pick/place step")
-    print("  Config: " + config["robot"]["backend"] + " backend")
+    print("\n  夹爪：每个取放步骤执行 open/close")
+    print("  后端：" + config["robot"]["backend"])
     print("=" * 50)
 
 
 def run_dry(config: dict):
-    """Run in dry mode - print plan, then simulate with no-op robot/gripper."""
+    """仿真模式：打印计划，用空操作的机器人/夹爪模拟执行。"""
     print_dry_run(config)
 
-    # Create a mock robot that just prints
+    # 创建一个只打印日志的模拟机器人
     class DryRobot:
         connected = False
         def connect(self):
-            print("[DryRobot] Connected (simulated)")
+            print("[DryRobot] 已连接（模拟）")
             self.connected = True
             return True
         def disconnect(self):
-            print("[DryRobot] Disconnected")
+            print("[DryRobot] 已断开")
             self.connected = False
         def movej(self, joints, vs=1.0):
             print(f"[DryRobot] movej({[round(j, 3) for j in joints]})")
@@ -113,23 +119,23 @@ def run_dry(config: dict):
     gripper = DryGripper()
     task = CoffeeTask(robot, gripper, config)
 
-    print("\n--- Starting dry run ---\n")
+    print("\n--- 开始仿真运行 ---\n")
     results = task.run_full()
     print_results(results)
 
 
 def run_real(config: dict, step: str = None):
-    """Run with real robot."""
+    """连接真实机器人执行。"""
     robot = create_robot(config)
     gripper = create_gripper(config)
 
-    print(f"Connecting to robot ({config['robot']['backend']})...")
+    print(f"正在连接机器人（{config['robot']['backend']}）...")
     if not robot.connect():
-        print("Failed to connect to robot. Exiting.")
+        print("机器人连接失败，退出。")
         sys.exit(1)
-    print("Robot connected.")
+    print("机器人已连接。")
 
-    # Connect gripper if serial
+    # 如果是串口夹爪则连接
     if hasattr(gripper, "connect"):
         gripper.connect()
 
@@ -137,44 +143,44 @@ def run_real(config: dict, step: str = None):
         task = CoffeeTask(robot, gripper, config)
 
         if step:
-            print(f"\n--- Running single step: {step} ---\n")
+            print(f"\n--- 执行单步：{step} ---\n")
             result = task.run_step(step)
             print_results([result])
         else:
-            print("\n--- Starting full coffee workflow ---\n")
+            print("\n--- 开始完整咖啡工作流 ---\n")
             results = task.run_full()
             print_results(results)
     finally:
         if hasattr(gripper, "disconnect"):
             gripper.disconnect()
         robot.disconnect()
-        print("Robot disconnected.")
+        print("机器人已断开。")
 
 
 def run_interactive(config: dict):
-    """Interactive mode for VLA/voice command testing."""
+    """交互模式：用于 VLA/语音命令测试。"""
     robot = create_robot(config)
     gripper = create_gripper(config)
 
-    print(f"Connecting to robot ({config['robot']['backend']})...")
+    print(f"正在连接机器人（{config['robot']['backend']}）...")
     if not robot.connect():
-        print("Failed to connect to robot. Exiting.")
+        print("机器人连接失败，退出。")
         sys.exit(1)
-    print("Robot connected.\n")
+    print("机器人已连接。\n")
 
     if hasattr(gripper, "connect"):
         gripper.connect()
 
     task = CoffeeTask(robot, gripper, config)
 
-    print("Interactive Coffee Robot")
+    print("交互式咖啡机器人")
     print("=" * 40)
-    print("Commands:")
-    print("  make_coffee / 做咖啡    - Full workflow")
+    print("可用命令：")
+    print("  make_coffee / 做咖啡    - 完整流程")
     for name in task.get_all_steps():
         print(f"  {name}")
-    print("  home / 回原点           - Return home")
-    print("  quit / exit              - Exit")
+    print("  home / 回原点           - 回到原点")
+    print("  quit / exit              - 退出")
     print("=" * 40)
 
     try:
@@ -193,19 +199,19 @@ def run_interactive(config: dict):
         if hasattr(gripper, "disconnect"):
             gripper.disconnect()
         robot.disconnect()
-        print("Robot disconnected.")
+        print("机器人已断开。")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Coffee Robot Demo - Aubo-i10 Nespresso")
+    parser = argparse.ArgumentParser(description="咖啡机器人 Demo - Aubo-i10 Nespresso 自动咖啡制作")
     parser.add_argument(
         "--config", "-c",
         default=os.path.join(os.path.dirname(__file__), "config", "coffee_task.yaml"),
-        help="Path to config YAML file",
+        help="配置文件路径",
     )
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Dry run (no robot needed)")
-    parser.add_argument("--step", "-s", type=str, default=None, help="Run a single step by name")
-    parser.add_argument("--interactive", "-i", action="store_true", help="Interactive command mode")
+    parser.add_argument("--dry-run", "-n", action="store_true", help="仿真模式（不需要连接机器人）")
+    parser.add_argument("--step", "-s", type=str, default=None, help="执行单个步骤（按名称）")
+    parser.add_argument("--interactive", "-i", action="store_true", help="交互命令模式")
     args = parser.parse_args()
 
     config = load_config(args.config)

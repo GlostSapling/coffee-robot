@@ -9,7 +9,7 @@ from robot.base import RobotController, Pose
 
 
 class LocalRobotController(RobotController):
-    """Ubuntu backend: controls robot via libpyauboi5 local SDK."""
+    """Ubuntu 后端：通过 libpyauboi5 本地 SDK 控制机器人。"""
 
     def __init__(self, config: dict):
         super().__init__(config)
@@ -43,7 +43,7 @@ class LocalRobotController(RobotController):
             ret = self._robot.connect(self._robot_ip, self._robot_port)
             if ret == 0:
                 self.connected = True
-                # Set safe motion profile
+                # 设置安全运动参数
                 max_vel = [v * math.pi / 180.0 for v in self._speed_cfg["max_velocity"]]
                 max_acc = [a * math.pi / 180.0 for a in self._speed_cfg["max_acceleration"]]
                 self._robot.set_joint_maxvelc(max_vel)
@@ -70,7 +70,7 @@ class LocalRobotController(RobotController):
             raise RuntimeError("Robot not connected")
         if len(joints) != 6:
             raise ValueError(f"Expected 6 joints, got {len(joints)}")
-        self._robot.move_joint(joints, True)  # blocking mode
+        self._robot.move_joint(joints, True)  # 阻塞模式
 
     def movel(self, pose: Pose, velocity_scale: float = 1.0):
         if not self.connected or not self._robot:

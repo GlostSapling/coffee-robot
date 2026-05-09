@@ -5,10 +5,10 @@ from gripper.base import GripperController
 
 
 class SerialGripperController(GripperController):
-    """Serial/SDK gripper implementation.
+    """串口夹爪实现。
 
-    Protocol is configurable via YAML config.
-    Customize the _send_command method for your specific gripper hardware.
+    协议可通过 YAML 配置。
+    根据实际夹爪硬件自定义 _send_command 方法。
     """
 
     def __init__(self, config: dict):
@@ -37,20 +37,20 @@ class SerialGripperController(GripperController):
             self._serial = None
 
     def _send_command(self, cmd: bytes):
-        """Send raw bytes to gripper. Override for custom protocol."""
+        """发送原始字节到夹爪。可重写以适配自定义协议。"""
         if self._serial and self._serial.is_open:
             self._serial.write(cmd)
             self._serial.flush()
             time.sleep(self._settle_time)
 
     def open(self):
-        """Open gripper via serial command."""
+        """通过串口指令打开夹爪。"""
         print(f"[Gripper] Opening (cmd: {self._open_cmd.hex()})")
         self._send_command(self._open_cmd)
         self._gripping = False
 
     def close(self):
-        """Close gripper via serial command."""
+        """通过串口指令闭合夹爪。"""
         print(f"[Gripper] Closing (cmd: {self._close_cmd.hex()})")
         self._send_command(self._close_cmd)
         self._gripping = True

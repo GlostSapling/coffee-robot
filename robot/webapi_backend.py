@@ -4,7 +4,7 @@ import sys
 import os
 from typing import List
 
-# Add the SDK path so we can import it
+# 添加 SDK 路径以便导入
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sdk"))
 
 from aubo_openclaw_sdk import AuboOpenclawSDK, SDKError
@@ -12,7 +12,7 @@ from robot.base import RobotController, Pose
 
 
 class WebAPIRobotController(RobotController):
-    """Windows backend: controls robot via AuboOpenclawSDK HTTP API."""
+    """Windows 后端：通过 AuboOpenclawSDK HTTP API 控制机器人。"""
 
     def __init__(self, config: dict):
         super().__init__(config)
