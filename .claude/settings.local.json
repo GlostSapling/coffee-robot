@@ -14,7 +14,9 @@
       "Bash(ssh git@github.com)",
       "Read(//home/sapling/.ssh/**)",
       "Bash(ssh-add -l)",
-      "Bash(ssh -vT git@github.com)"
+      "Bash(ssh -vT git@github.com)",
+      "Bash(pip --version)",
+      "Bash(pip install *)"
     ]
   }
 }
