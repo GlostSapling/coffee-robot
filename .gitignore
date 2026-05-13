@@ -221,9 +221,6 @@ __marimo__/
 # Coffee Robot project-specific
 # ============================================================
 
-# Aubo host application (large, separate project - not needed here)
-aubo/
-
 # Large binary files
 *.dll
 *.rar
