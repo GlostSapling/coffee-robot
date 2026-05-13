@@ -17,7 +17,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  # Commented out - needed for DLL files in aubo/
 lib64/
 parts/
 sdist/
