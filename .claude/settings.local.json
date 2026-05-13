@@ -16,7 +16,9 @@
       "Bash(ssh-add -l)",
       "Bash(ssh -vT git@github.com)",
       "Bash(pip --version)",
-      "Bash(pip install *)"
+      "Bash(pip install *)",
+      "Bash(git config *)",
+      "Bash(git *)"
     ]
   }
 }
