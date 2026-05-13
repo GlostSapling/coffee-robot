@@ -78,6 +78,54 @@ python demo_coffee.py
 - `aubo/aubo/aubo_host_workspace/coffee_config.py` 中的 IP 地址正确
 - 夹爪控制器已连接（IP: 192.168.31.10）
 
+### 分段运行（单步执行）
+
+```bash
+# 执行单个步骤（支持中文名称）
+python demo_coffee.py --step 抓杯子
+python demo_coffee.py --step 开盖
+python demo_coffee.py --step 放杯子
+
+# 执行单个步骤（支持英文名称）
+python demo_coffee.py --step pick_cup
+python demo_coffee.py --step open_lid
+python demo_coffee.py --step place_cup
+
+# 执行单个步骤（支持步骤编号，从1开始）
+python demo_coffee.py --step 1
+python demo_coffee.py --step 5
+
+# 从指定步骤开始执行到最后
+python demo_coffee.py --from 抓杯子
+
+# 执行指定范围的步骤
+python demo_coffee.py --from 抓杯子 --to 放杯子
+
+# 列出所有可用步骤
+python demo_coffee.py --list
+```
+
+**可用的步骤名称：**
+
+| 编号 | 中文名称 | 英文名称 | 说明 |
+|------|----------|----------|------|
+| 1 | 张开夹爪 | open_gripper | 张开夹爪准备抓取 |
+| 2 | 抓杯子 | pick_cup | 移动到抓杯点位 |
+| 3 | 夹爪闭合 | close_gripper | 夹爪闭合5%抓杯 |
+| 4 | 移动中间 | move_mid | 移动到中间姿态 |
+| 5 | 移动咖啡机 | move_coffee | 移动到咖啡机位置 |
+| 6 | 放杯子 | place_cup | 松开夹爪放杯 |
+| 7 | 移出咖啡机 | move_out | 移出咖啡机 |
+| 8 | 开盖 | open_lid | 开盖+夹爪16% |
+| 9 | 推盖中间 | push_mid | 推盖中间+夹爪0% |
+| 10 | 推盖子 | push_lid | 推盖子 |
+
+**使用场景：**
+- `python demo_coffee.py --step 抓杯子` - 只执行抓杯子动作
+- `python demo_coffee.py --step 开盖` - 只执行开盖动作
+- `python demo_coffee.py --from 抓杯子 --to 放杯子` - 执行从抓杯子到放杯子的完整流程
+- `python demo_coffee.py --list` - 查看所有可用步骤
+
 ### 方式二：使用 GUI 上位机
 
 ```bash
