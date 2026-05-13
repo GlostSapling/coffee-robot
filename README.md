@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 咖啡机器人 - Aubo-i10 Nespresso 自动咖啡制作系统
 
 基于遨博 Aubo-i10 机械臂的自动咖啡制作 Demo。机械臂完成从拿杯子、放胶囊、到出杯的全流程自动化操作，支持后续接入 OpenClaw 语音控制。
@@ -6,29 +5,27 @@
 ## 工作流程
 
 ```
-拿杯子 → 放到咖啡机下 → 拿胶囊 → 打开咖啡机盖子 → 放入胶囊 → 盖上盖子 → 按启动键 → 等待萃取 → 取杯 → 送到指定位置
+张开夹爪 → 移动到抓杯点位 → 夹爪闭合抓杯 → 移动到中间姿态 → 移动到咖啡机 → 松开夹爪放杯 → 移出咖啡机 → 开盖+夹爪调整 → 推盖中间 → 推盖子
 ```
 
-共 10 个步骤，每步可独立调用，也可一键串联执行。
+共 10 个步骤，按顺序自动执行。
 
 ## 项目结构
 
 ```
 coffee-robot/
-├── config/
-│   └── coffee_task.yaml       # 所有参数配置（点位、速度、夹爪、咖啡机）
-├── robot/
-│   ├── base.py                # 抽象机器人接口
-│   ├── webapi_backend.py      # Windows WebAPI 后端（HTTP 远程控制）
-│   └── local_backend.py       # Ubuntu libpyauboi5 后端（本地 SDK）
-├── gripper/
-│   ├── base.py                # 抽象夹爪接口
-│   └── serial_gripper.py      # 串口夹爪实现（可自定义协议）
-├── tasks/
-│   └── coffee_task.py         # 咖啡制作工作流（10 步 + 命令分发）
-├── coffee_demo.py             # 主入口
+├── aubo/
+│   └── aubo/
+│       └── aubo_host_workspace/
+│           ├── main.py              # Tkinter GUI 主程序
+│           ├── aubo_sdk.py          # Aubo SDK 封装
+│           ├── coffee_config.py     # 咖啡流程配置（点位、IP）
+│           ├── api_server.py        # WebAPI 服务
+│           └── lib/                 # DLL 依赖文件
+├── demo_coffee.py                   # 咖啡制作 Demo 主入口
 ├── requirements.txt
-└── CLAUDE.md
+├── CLAUDE.md
+└── README.md
 ```
 
 ## 环境准备
@@ -39,160 +36,184 @@ coffee-robot/
 pip install -r requirements.txt
 ```
 
-依赖列表：`pyyaml`、`requests`、`numpy`、`pyserial`
+依赖列表：
+- `fastapi` - WebAPI 框架
+- `uvicorn` - ASGI 服务器
+- `pydantic` - 数据验证
+- `requests` - HTTP 客户端
+- `opencv-python` - 图像处理
+- `numpy` - 数值计算
+- `pyorbbecsdk` - Orbbec 深度相机 SDK
+- `pyserial` - 串口通信
+- `pyyaml` - YAML 配置
 
-### 机械臂后端（二选一）
+### 系统要求
 
-**Windows（通过 WebAPI 远程控制）：**
+- **操作系统**: Windows 10/11（Aubo SDK 仅支持 Windows）
+- **Python**: 3.8+（推荐 3.10/3.11）
+- **机械臂**: Aubo i10H + 遨博控制器（端口 8899）
+- **相机**（可选）: Orbbec 深度相机
 
-1. 先启动上位机：`python main.py`（在 `aubo/aubo_host_workspace/` 目录下）
-2. 在上位机 GUI 中连接机械臂，启动 WebAPI 服务（默认端口 8000）
-3. 确保 `config/coffee_task.yaml` 中 `robot.backend: webapi`，IP 和端口与上位机一致
+### DLL 依赖
 
-**Ubuntu（本地 SDK 直连）：**
-
-1. 确保 `libpyauboi5.so` 已安装在 `~/aubo_quick_start/python_linux_lib/`
-2. 确保 `config/coffee_task.yaml` 中 `robot.backend: local`，SDK 路径正确
-3. 机械臂 IP 和端口在 `robot.local` 段配置
-
-### 夹爪
-
-默认使用串口控制的夹爪。如暂无夹爪，将配置中 `gripper.type` 改为 `none` 即可跳过夹爪操作（仿真模式）。
-
-串口夹爪的协议字节在 `config/coffee_task.yaml` 的 `gripper.serial` 段配置，需根据实际夹爪型号修改 `open_cmd` 和 `close_cmd`。
+所有必需的 DLL 文件已包含在 `aubo/aubo/aubo_host_workspace/lib/` 目录中：
+- `serviceinterface2.dll` - Aubo 机器人控制器接口
+- `libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll` - MinGW 运行时
 
 ## 使用方法
 
-### 仿真模式（不需要连接机器人）
+### 方式一：直接运行 Demo（推荐）
 
 ```bash
-python3 coffee_demo.py --dry-run
+python demo_coffee.py
 ```
 
-打印完整工作流计划和模拟执行日志，用于验证配置和流程。
+这将：
+1. 连接到机械臂（IP: 192.168.31.6，端口: 8899）
+2. 按顺序执行全部 10 个步骤
+3. 完成后自动断开连接
 
-### 完整执行
+**注意**: 运行前请确保：
+- 机械臂已上电并连接到网络
+- `aubo/aubo/aubo_host_workspace/coffee_config.py` 中的 IP 地址正确
+- 夹爪控制器已连接（IP: 192.168.31.10）
+
+### 方式二：使用 GUI 上位机
 
 ```bash
-python3 coffee_demo.py
+cd aubo/aubo/aubo_host_workspace
+python main.py
 ```
 
-连接机器人，按顺序执行全部 10 个步骤，完成后自动回到原点。
+启动 Tkinter 图形界面，可以：
+- 手动连接/断开机械臂
+- 控制机械臂移动
+- 启动 WebAPI 服务（默认端口 8000）
+- 捕获相机图像和视频
 
-### 执行单个步骤
+### 方式三：通过 WebAPI 远程控制
+
+1. 先启动上位机 GUI
+2. 在 GUI 中连接机械臂并启动 WebAPI 服务
+3. 使用 HTTP 请求控制机械臂：
 
 ```bash
-python3 coffee_demo.py --step pick_cup
-python3 coffee_demo.py --step insert_capsule
-python3 coffee_demo.py --step deliver_cup
-```
+# 检查连接状态
+curl http://127.0.0.1:8000/api/status
 
-可用的步骤名称：
+# 连接机械臂
+curl -X POST http://127.0.0.1:8000/api/connect \
+  -H "Content-Type: application/json" \
+  -d '{"ip":"192.168.31.6","port":8899}'
 
-| 步骤 | 名称 | 说明 |
-|------|------|------|
-| 1 | `pick_cup` | 拿杯子 |
-| 2 | `place_cup_under_machine` | 把杯子放到咖啡机下 |
-| 3 | `pick_capsule` | 拿胶囊 |
-| 4 | `open_machine_lid` | 打开咖啡机盖子 |
-| 5 | `insert_capsule` | 把胶囊放进去 |
-| 6 | `close_machine_lid` | 盖上盖子 |
-| 7 | `press_start_button` | 按启动键 |
-| 8 | `wait_for_brew` | 等待萃取 |
-| 9 | `pick_cup_from_machine` | 取杯 |
-| 10 | `deliver_cup` | 送到指定位置 |
-
-### 交互模式（语音/VLA 测试入口）
-
-```bash
-python3 coffee_demo.py --interactive
-```
-
-进入命令行交互界面，输入命令即可执行对应操作：
-
-```
-> make_coffee       # 执行完整流程
-> 做咖啡            # 中文命令同样支持
-> pick_cup          # 单步执行
-> home              # 回原点
-> quit              # 退出
-```
-
-### 指定配置文件
-
-```bash
-python3 coffee_demo.py --config /path/to/my_config.yaml
+# 移动关节（弧度）
+curl -X POST http://127.0.0.1:8000/api/movej \
+  -H "Content-Type: application/json" \
+  -d '{"joints":[0.3, -0.5, 0.8, 0.0, 0.5, 0.0]}'
 ```
 
 ## 配置说明
 
-所有参数集中在 `config/coffee_task.yaml` 中，**代码中无硬编码值**。
+### 机械臂配置
+
+在 `aubo/aubo/aubo_host_workspace/coffee_config.py` 中修改：
+
+```python
+ROBOT_IP = "192.168.31.6"    # 机械臂控制器 IP
+ROBOT_PORT = 8899             # 控制器端口
+GRIPPER_IP = "192.168.31.10"  # 夹爪控制器 IP
+```
 
 ### 点位配置
 
-所有点位以 6 轴关节角（弧度）表示。每个点位可配置：
+所有点位以 6 轴关节角（弧度）表示：
 
-```yaml
-waypoints:
-  cup_pickup:
-    joints: [0.3, -0.5, 0.8, 0.0, 0.5, 0.0]  # 目标关节角
-    approach_offset: [0.0, 0.0, 0.1]            # 接近偏移（先移到上方）
-    depart_offset: [0.0, 0.0, 0.1]              # 离开偏移（夹住后抬升）
+```python
+POS_HOME = [-3.0075, -0.0247, 2.1940, 2.0989, 1.2444, -0.0142]  # 初始位姿
+POS_GRAB = [-2.9943, -1.0912, 1.2830, 2.3219, 1.4476, -0.0142]  # 抓杯子点位
+POS_MID = [-2.9077, -0.7870, 1.6746, 2.3219, 1.4476, -0.0142]   # 中间姿态
+POS_COFFEE = [-2.7957, -1.1157, 1.2347, 2.3217, 1.2838, -0.0142] # 咖啡机位置
 ```
 
-> **重要：** 当前配置中的点位是占位值，必须用示教器实际测量后替换。
+> **重要**: 当前配置中的点位是实际测量值，可根据实际情况调整。
 
-### 速度配置
+### 流程步骤配置
 
-```yaml
-robot:
-  speed:
-    max_velocity: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]       # 各轴最大速度 (rad/s)
-    max_acceleration: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]    # 各轴最大加速度 (rad/s^2)
+在 `STEPS` 列表中定义执行顺序：
+
+```python
+STEPS = [
+    ("张开夹爪",          "gripper",  {"percent": 100}),
+    ("移动到抓杯点位",    "movej",    POS_GRAB),
+    ("夹爪闭合5%抓杯",    "gripper",  {"percent": 5}),
+    # ... 更多步骤
+]
 ```
 
-### 夹爪配置
+动作类型：
+- `"movej"` - 移动关节到指定位置
+- `"gripper"` - 控制夹爪（percent: 0-100）
+- `"movej+gripper"` - 同时移动和控制夹爪
 
-```yaml
-gripper:
-  type: serial           # "serial" 或 "none"
-  serial:
-    port: "/dev/ttyUSB0" # 串口设备
-    baudrate: 115200
-    open_cmd: [0x01, 0x01, 0x00]   # 松开指令字节
-    close_cmd: [0x01, 0x01, 0xFF]  # 夹紧指令字节
-    settle_time: 0.5     # 夹爪动作后等待时间（秒）
+## ROS2 集成
+
+### 启动 ROS2 桥接节点（Ubuntu）
+
+```bash
+source /opt/ros/humble/setup.bash
+pip3 install requests
+python3 aubo/aubo/aubo_host_workspace/aubo_ros2_http_bridge.py \
+  --host_ip <WINDOWS_IP> \
+  --host_port 8001
 ```
 
-### 咖啡机配置
+这将：
+- 订阅 `/aubo/joint_cmds` 话题并转发到 WebAPI
+- 发布 `/joint_states` 话题（从 WebAPI 获取状态）
 
-```yaml
-coffee_machine:
-  type: nespresso
-  brew_time: 25          # 萃取等待时间（秒）
-```
+## 故障排除
+
+### 连接失败
+
+1. 检查机械臂 IP 地址是否正确
+2. 确认机械臂已上电并连接到网络
+3. 检查防火墙设置（端口 8899）
+4. 使用 `ping 192.168.31.6` 测试网络连通性
+
+### DLL 加载失败
+
+确保 `aubo/aubo/aubo_host_workspace/lib/` 目录包含所有必需的 DLL 文件。
+
+### 夹爪无响应
+
+1. 检查夹爪控制器 IP 地址（默认 192.168.31.10）
+2. 确认夹爪控制器已上电
+3. 使用 `curl http://192.168.31.10` 测试连通性
 
 ## 后续扩展
 
 ### 接入 OpenClaw 语音控制
 
-`tasks/coffee_task.py` 中的 `CoffeeTask.run_by_command()` 方法已预留语音/VLA 命令接口：
+可以扩展 `demo_coffee.py` 添加语音命令支持：
 
 ```python
-task = CoffeeTask(robot, gripper, config)
-task.run_by_command("做咖啡")        # 完整流程
-task.run_by_command("pick_cup")      # 单步
+# 示例：语音命令映射
+voice_commands = {
+    "做咖啡": "full_flow",
+    "拿杯子": "pick_cup",
+    "放胶囊": "insert_capsule",
+}
 ```
-
-只需将 OpenClaw 语音识别结果映射到对应命令字符串即可。
 
 ### 自定义夹爪协议
 
-编辑 `gripper/serial_gripper.py` 中的 `_send_command()` 方法，或在 YAML 中修改指令字节适配你的夹爪硬件。
+修改 `demo_coffee.py` 中的 `gripper_cmd()` 函数，或在配置中添加夹爪控制参数。
 
 ### 切换机械臂后端
 
-在 `config/coffee_task.yaml` 中修改 `robot.backend`：
+- **Windows**: 使用 WebAPI 远程控制（当前方案）
+- **Ubuntu**: 使用 libpyauboi5 本地 SDK 直连
 
-- `webapi` — 通过 Windows 上位机的 HTTP API 控制（适合 Windows 环境）
-- `local` — 通过 libpyauboi5 本地 SDK 直连（适合 Ubuntu 环境）
+## 许可证
+
+本项目为内部 Demo，仅供学习和研究使用。
