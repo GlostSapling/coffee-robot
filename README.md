@@ -22,7 +22,10 @@ coffee-robot/
 │           ├── coffee_config.py     # 咖啡流程配置（点位、IP）
 │           ├── api_server.py        # WebAPI 服务
 │           └── lib/                 # DLL 依赖文件
-├── demo_coffee.py                   # 咖啡制作 Demo 主入口
+├── all.py                           # 一键执行完整咖啡流程
+├── move.py                          # 关节移动脚本
+├── catch.py                         # 夹爪控制脚本
+├── demo_coffee.py                   # 咖啡制作 Demo（支持分步执行）
 ├── requirements.txt
 ├── CLAUDE.md
 └── README.md
@@ -62,37 +65,61 @@ pip install -r requirements.txt
 
 ## 使用方法
 
-### 方式一：直接运行 Demo（推荐）
+### 方式一：独立脚本（推荐）
+
+提供三个独立脚本，各自可直接执行：
+
+#### `all.py` - 一键执行完整咖啡流程
+
+```bash
+python all.py
+```
+
+连接机械臂并按顺序执行全部 10 个步骤，完成后自动断开。支持 Ctrl+C 急停。
+
+#### `move.py` - 关节移动
+
+```bash
+python move.py <j1> <j2> <j3> <j4> <j5> <j6>
+```
+
+移动机械臂到指定关节角度位置（单位：度）。
+
+```bash
+# 示例：移动到指定角度
+python move.py -172.2 -62.5 73.5 120.2 82.9 -0.8
+
+# 回零位
+python move.py 0 0 0 0 0 0
+```
+
+自动校验软限位（±175°）和单步跳变（≤90°）。
+
+#### `catch.py` - 夹爪控制
+
+```bash
+python catch.py <percent>
+```
+
+控制夹爪开合度（0-100%）。
+
+```bash
+python catch.py 100  # 完全张开
+python catch.py 0    # 完全闭合
+python catch.py 50   # 半开
+```
+
+### 方式二：Demo 主脚本（支持分步执行）
 
 ```bash
 python demo_coffee.py
 ```
 
-这将：
-1. 连接到机械臂（IP: 192.168.31.6，端口: 8899）
-2. 按顺序执行全部 10 个步骤
-3. 完成后自动断开连接
-
-**注意**: 运行前请确保：
-- 机械臂已上电并连接到网络
-- `aubo/aubo/aubo_host_workspace/coffee_config.py` 中的 IP 地址正确
-- 夹爪控制器已连接（IP: 192.168.31.10）
-
-### 分段运行（单步执行）
+完整执行流程，同时支持分段运行：
 
 ```bash
-# 执行单个步骤（支持中文名称）
+# 执行单个步骤
 python demo_coffee.py --step 抓杯子
-python demo_coffee.py --step 开盖
-python demo_coffee.py --step 放杯子
-
-# 执行单个步骤（支持英文名称）
-python demo_coffee.py --step pick_cup
-python demo_coffee.py --step open_lid
-python demo_coffee.py --step place_cup
-
-# 执行单个步骤（支持步骤编号，从1开始）
-python demo_coffee.py --step 1
 python demo_coffee.py --step 5
 
 # 从指定步骤开始执行到最后
@@ -104,6 +131,11 @@ python demo_coffee.py --from 抓杯子 --to 放杯子
 # 列出所有可用步骤
 python demo_coffee.py --list
 ```
+
+**注意**: 运行前请确保：
+- 机械臂已上电并连接到网络
+- `aubo/aubo/aubo_host_workspace/coffee_config.py` 中的 IP 地址正确
+- 夹爪控制器已连接（IP: 192.168.31.10）
 
 **可用的步骤名称：**
 
@@ -120,13 +152,7 @@ python demo_coffee.py --list
 | 9 | 推盖中间 | push_mid | 推盖中间+夹爪0% |
 | 10 | 推盖子 | push_lid | 推盖子 |
 
-**使用场景：**
-- `python demo_coffee.py --step 抓杯子` - 只执行抓杯子动作
-- `python demo_coffee.py --step 开盖` - 只执行开盖动作
-- `python demo_coffee.py --from 抓杯子 --to 放杯子` - 执行从抓杯子到放杯子的完整流程
-- `python demo_coffee.py --list` - 查看所有可用步骤
-
-### 方式二：使用 GUI 上位机
+### 方式三：使用 GUI 上位机
 
 ```bash
 cd aubo/aubo/aubo_host_workspace
@@ -139,7 +165,7 @@ python main.py
 - 启动 WebAPI 服务（默认端口 8000）
 - 捕获相机图像和视频
 
-### 方式三：通过 WebAPI 远程控制
+### 方式四：通过 WebAPI 远程控制
 
 1. 先启动上位机 GUI
 2. 在 GUI 中连接机械臂并启动 WebAPI 服务
